@@ -8,6 +8,6 @@ stdenv.mkDerivation rec {
     rustup
     rust-analyzer
     SDL2
-    SDL2_mixer
+    SDL2_image
   ];
 }
