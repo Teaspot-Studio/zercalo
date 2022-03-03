@@ -130,6 +130,9 @@ checksum = "fe88247b92c1df6b6de80ddc290f3976dbdf2f5f5d3fd049a9fb598c6dd5ca73"
 [[package]]
 name = "zercalo-format"
 version = "0.1.0"
+dependencies = [
+ "glam 0.20.2",
+]
 
 [[package]]
 name = "zercalo-render"
@@ -139,4 +142,5 @@ dependencies = [
  "glam 0.20.2",
  "png",
  "sdl2",
+ "zercalo-format",
 ]
