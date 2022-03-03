@@ -66,8 +66,9 @@ fn animate_scene(scene: &mut Scene, _frame: u32) {
     let quat = Quat::from_axis_angle(Vec3::Y, std::f32::consts::PI / 180.0);
     let halfsize = VOLUME_SIZE as f32 * 0.5;
 
-    scene.camera.eye = quat.mul_vec3(scene.camera.eye);
-    scene.camera.dir = (Vec3::new(halfsize, halfsize, halfsize) - scene.camera.eye).normalize();
+    let target = Vec3::new(halfsize, halfsize, halfsize);
+    scene.camera.eye = target + quat.mul_vec3(scene.camera.eye - target);
+    scene.camera.dir = (target - scene.camera.eye).normalize();
 }
 
 fn render_frames<'a>(
