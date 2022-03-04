@@ -17,7 +17,7 @@ const WINDOW_WIDTH: u32 = 1024;
 const WINDOW_HEIGHT: u32 = 1024;
 const FRAMES_COUNT: u32 = 256;
 
-fn test_scene() -> RotationView {
+fn test_scene() -> RotationView<Scene> {
     let mut model1 =
         Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::new(200, 100, 0, 255));
     model1.rotation = Quat::from_axis_angle(Vec3::X, std::f32::consts::PI / 6.0);

@@ -1,4 +1,4 @@
-use super::scene::Scene;
+use super::scene::{Camera, Scene};
 use glam::f32::Quat;
 use glam::Vec3;
 
@@ -21,20 +21,48 @@ impl Renderable for Scene {
     }
 }
 
-pub struct RotationView {
-    pub scene: Scene,
+/// Trait that allows to access substate with camera
+pub trait HasMutCamera {
+    fn get_mut_camera(&'_ mut self) -> &'_ mut Camera;
 }
 
-impl Renderable for RotationView {
+impl HasMutCamera for Scene {
+    fn get_mut_camera(&'_ mut self) -> &'_ mut Camera {
+        &mut self.camera
+    }
+}
+
+/// Trait that allows to access bounding volume of inner scene
+pub trait HasBounding {
+    fn get_bounding_volume(&self) -> (Vec3, Vec3);
+
+    fn get_bounding_center(&self) -> Vec3 {
+        let (minv, maxv) = self.get_bounding_volume();
+        (maxv - minv) * 0.5
+    }
+}
+
+impl HasBounding for Scene {
+    fn get_bounding_volume(&self) -> (Vec3, Vec3) {
+        self.bounding()
+    }
+}
+
+pub struct RotationView<T> {
+    pub scene: T,
+}
+
+impl<T: Renderable + HasMutCamera + HasBounding> Renderable for RotationView<T> {
     fn animate(&mut self, _frame: u32) {
         let quat = Quat::from_axis_angle(Vec3::Y, std::f32::consts::PI / 180.0);
 
-        let target = self.scene.center();
-        self.scene.camera.eye = target + quat.mul_vec3(self.scene.camera.eye - target);
-        self.scene.camera.dir = (target - self.scene.camera.eye).normalize();
+        let target = self.scene.get_bounding_center();
+        let cam = self.scene.get_mut_camera();
+        cam.eye = target + quat.mul_vec3(cam.eye - target);
+        cam.dir = (target - cam.eye).normalize();
     }
 
     fn render(&self) -> &Scene {
-        &self.scene
+        self.scene.render()
     }
 }
