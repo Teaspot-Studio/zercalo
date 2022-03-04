@@ -97,7 +97,7 @@ pub fn render_frames<'a, R: Renderable>(
                                     ),
                                 };
 
-                                let mut model_color = Vec4::new(0.0, 0.0, 0.0, 0.0);
+                                let mut model_color = Vec4::ZERO;
                                 let mut model_dist = scene.camera.max_dist;
                                 'rayloop: for hit in volume.traverse_ray(ray) {
                                     let inormal: IVec3 = hit.normal.unwrap_or((1, 0, 0)).into();
@@ -116,10 +116,10 @@ pub fn render_frames<'a, R: Renderable>(
                                         light_component +=
                                             new_component.max(Vec3::new(0.0, 0.0, 0.0));
                                     }
-
+                                    let ambient_component = diffuse.truncate() * scene.ambient.as_vec3();
                                     model_color = blend_colors(
                                         model_color,
-                                        (light_component, diffuse.w).into(),
+                                        (ambient_component + light_component, diffuse.w).into(),
                                     );
                                     model_dist = (ray_origin - voxel.as_vec3()).length();
                                     if model_color.w >= 1.0 {

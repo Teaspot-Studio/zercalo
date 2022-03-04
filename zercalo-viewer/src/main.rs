@@ -1,4 +1,3 @@
-use glam::f32::Quat;
 use glam::{UVec2, UVec3, Vec3};
 use log::*;
 use sdl2::event::Event;
@@ -8,37 +7,140 @@ use sdl2::rect::Rect;
 use sdl2::render::TextureCreator;
 use std::error::Error;
 
-use zercalo_format::animation::RotationView;
-use zercalo_format::scene::{ColorRGB, ColorRGBA, Light, Model, Scene};
+use zercalo_format::animation::{HasBounding, HasMutCamera, Renderable, RotationView};
+use zercalo_format::procedure::smoke::{SmokeModel, SmokePart};
+use zercalo_format::scene::{Camera, ColorRGB, ColorRGBA, Light, Model, Scene};
 use zercalo_render::encode::save_frames;
 use zercalo_render::render::render_frames;
 
-const TILE_SIZE: u32 = 64;
+const TILE_WIDTH: u32 = 64;
+const TILE_HEIGHT: u32 = 128;
 const WINDOW_WIDTH: u32 = 1024;
 const WINDOW_HEIGHT: u32 = 1024;
 const FRAMES_COUNT: u32 = 256;
 
-fn test_scene() -> RotationView<Scene> {
-    let mut model1 =
-        Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::new(200, 100, 0, 255));
-    model1.rotation = Quat::from_axis_angle(Vec3::X, std::f32::consts::PI / 6.0);
-    model1.offset = Vec3::new(5.0, 1.0, 0.0);
-    let mut model2 = Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::white());
-    model2.rotation = Quat::from_axis_angle(Vec3::X, -std::f32::consts::PI / 6.0);
-    let light1 = Light {
-        position: Vec3::new(25.0, 20.0, 20.0),
-        color: ColorRGB::new(255, 230, 230),
-    };
-    let light2 = Light {
-        position: Vec3::new(-25.0, 20.0, -20.0),
-        color: ColorRGB::new(210, 210, 255),
-    };
-    let scene = Scene {
-        models: vec![model1, model2],
-        lights: vec![light1, light2],
-        ..Scene::default()
-    };
-    RotationView { scene }
+struct TestScene {
+    smoke: SmokeModel,
+    // cached
+    rendered: Scene,
+}
+
+impl TestScene {
+    fn new() -> RotationView<TestScene> {
+        let particles = vec![
+            SmokePart {
+                offset: Vec3::new(32.0, 2.0, 32.0),
+                radius: 3.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.001,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 40.0,
+            },
+            SmokePart {
+                offset: Vec3::new(25.0, -5.0, 32.0),
+                radius: 2.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.002,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 50.0,
+            },
+            SmokePart {
+                offset: Vec3::new(32.0, -5.0, 25.0),
+                radius: 5.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.004,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 50.0,
+            },
+            SmokePart {
+                offset: Vec3::new(32.0, -15.0, 32.0),
+                radius: 2.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.002,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 60.0,
+            },
+            SmokePart {
+                offset: Vec3::new(32.0, -30.0, 20.0),
+                radius: 1.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.002,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 60.0,
+            },
+            SmokePart {
+                offset: Vec3::new(20.0, -35.0, 32.0),
+                radius: 1.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.002,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 60.0,
+            },
+        ];
+        let model = SmokeModel {
+            size: UVec3::new(64, 128, 64),
+            particles,
+            ..SmokeModel::default()
+        };
+        let eye = Vec3::new(128., 128., 128.);
+        let mut scene = TestScene {
+            smoke: model,
+            rendered: Scene {
+                camera: Camera {
+                    eye,
+                    dir: -eye.normalize(),
+                    ..Camera::default()
+                },
+                lights: vec![Light {
+                    position: Vec3::new(128.0, 150.0, 75.0),
+                    color: ColorRGB::white(),
+                }],
+                ..Scene::default()
+            },
+        };
+        scene.animate(0);
+        RotationView {
+            scene,
+            target_y: Some(32.0),
+            rotation_speed: 0.0,
+        } // std::f32::consts::PI / 180.0
+    }
+}
+
+impl HasMutCamera for TestScene {
+    fn get_mut_camera(&'_ mut self) -> &'_ mut Camera {
+        &mut self.rendered.camera
+    }
+}
+
+impl Renderable for TestScene {
+    fn animate(&mut self, frame: u32) {
+        self.smoke.animate(frame);
+        // let test_model = Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::white());
+        self.rendered.models = vec![self.smoke.generate()];
+    }
+
+    fn render(&self) -> &Scene {
+        &self.rendered
+    }
+}
+
+impl HasBounding for TestScene {
+    fn get_bounding_volume(&self) -> (Vec3, Vec3) {
+        self.rendered.bounding()
+    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -66,11 +168,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     canvas.clear();
     canvas.present();
 
-    let scene = test_scene();
+    let scene = TestScene::new();
 
     let mut event_pump = sdl_context.event_pump()?;
     let texture_creator: TextureCreator<_> = canvas.texture_creator();
-    let tile_size = UVec2::new(TILE_SIZE, TILE_SIZE);
+    let tile_size = UVec2::new(TILE_WIDTH, TILE_HEIGHT);
     let mut frames = render_frames(
         &mut canvas,
         &texture_creator,
@@ -109,10 +211,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             &frames[frame],
             None,
             Rect::new(
-                ((WINDOW_WIDTH as f32 / (2.0 * sx)) as u32 - TILE_SIZE / 2) as i32,
-                ((WINDOW_HEIGHT as f32 / (2.0 * sy)) as u32 - TILE_SIZE / 2) as i32,
-                TILE_SIZE,
-                TILE_SIZE,
+                ((WINDOW_WIDTH as f32 / (2.0 * sx)) as u32 - TILE_WIDTH / 2) as i32,
+                ((WINDOW_HEIGHT as f32 / (2.0 * sy)) as u32 - TILE_HEIGHT / 2) as i32,
+                TILE_WIDTH,
+                TILE_HEIGHT,
             ),
         )?;
         canvas.present();

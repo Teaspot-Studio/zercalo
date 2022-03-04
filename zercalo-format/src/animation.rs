@@ -21,13 +21,35 @@ impl Renderable for Scene {
     }
 }
 
+/// Trait for complex scenes that has embedded scene inside
+pub trait HasScene {
+    fn get_scene(&self) -> &Scene;
+}
+
+impl HasScene for Scene {
+    fn get_scene(&self) -> &Scene {
+        self
+    }
+}
+
+/// Trait for complex scenes that has embedded mutable scene inside
+pub trait HasMutScene {
+    fn get_scene_mut(&mut self) -> &mut Scene;
+}
+
+impl HasMutScene for Scene {
+    fn get_scene_mut(&mut self) -> &mut Scene {
+        self
+    }
+}
+
 /// Trait that allows to access substate with camera
 pub trait HasMutCamera {
-    fn get_mut_camera(&'_ mut self) -> &'_ mut Camera;
+    fn get_mut_camera(&mut self) -> &mut Camera;
 }
 
 impl HasMutCamera for Scene {
-    fn get_mut_camera(&'_ mut self) -> &'_ mut Camera {
+    fn get_mut_camera(&mut self) -> &mut Camera {
         &mut self.camera
     }
 }
@@ -54,13 +76,20 @@ impl HasBounding for Scene {
 
 pub struct RotationView<T> {
     pub scene: T,
+    pub target_y: Option<f32>,
+    pub rotation_speed: f32,
 }
 
 impl<T: Renderable + HasMutCamera + HasBounding> Renderable for RotationView<T> {
-    fn animate(&mut self, _frame: u32) {
-        let quat = Quat::from_axis_angle(Vec3::Y, std::f32::consts::PI / 180.0);
+    fn animate(&mut self, frame: u32) {
+        self.scene.animate(frame);
 
-        let target = self.scene.get_bounding_center();
+        let quat = Quat::from_axis_angle(Vec3::Y, self.rotation_speed);
+
+        let mut target = self.scene.get_bounding_center();
+        if let Some(y) = self.target_y {
+            target.y = y;
+        }
         let cam = self.scene.get_mut_camera();
         cam.eye = target + quat.mul_vec3(cam.eye - target);
         cam.dir = (target - cam.eye).normalize();

@@ -21,6 +21,14 @@ impl ColorRGB {
             (self.b as f32) / 255.0,
         )
     }
+
+    pub fn white() -> Self {
+        ColorRGB::new(255, 255, 255)
+    }
+
+    pub fn black() -> Self {
+        ColorRGB::new(0, 0, 0)
+    }
 }
 
 impl Default for ColorRGB {
@@ -92,7 +100,7 @@ pub struct Light {
 impl Default for Light {
     fn default() -> Self {
         Light {
-            position: Vec3::new(25.0, 25.0, 25.0),
+            position: Vec3::new(23.0, 25.0, 27.0),
             color: ColorRGB::new(255, 255, 255),
         }
     }
@@ -116,7 +124,7 @@ impl Model {
         for x in 0..size.x {
             for y in 0..size.y {
                 for z in 0..size.z {
-                    let i = x + y * size.y + z * size.x * size.y;
+                    let i = x + y * size.x + z * size.x * size.y;
                     voxels[i as usize] = generator(UVec3::new(x, y, z));
                 }
             }
@@ -134,7 +142,7 @@ impl Index<UVec3> for Model {
     type Output = ColorRGBA;
 
     fn index(&self, index: UVec3) -> &Self::Output {
-        let i = index.x + index.y * self.size.y + index.z * self.size.x * self.size.y;
+        let i = index.x + index.y * self.size.x + index.z * self.size.x * self.size.y;
         &self.voxels[i as usize]
     }
 }
@@ -142,7 +150,7 @@ impl Index<UVec3> for Model {
 /// Defines distance between each pixel ray. Effectively scales image
 const DEFAULT_PIXEL_SIZE: f32 = 0.7;
 /// Defines maximum distance ray can travel before it considered as going to infininity.
-const DEFAULT_RAY_MAX_DIST: f32 = 100.0;
+const DEFAULT_RAY_MAX_DIST: f32 = 1024.0;
 
 #[derive(Clone, Debug)]
 pub struct Camera {
@@ -171,6 +179,7 @@ pub struct Scene {
     pub models: Vec<Model>,
     pub lights: Vec<Light>,
     pub camera: Camera,
+    pub ambient: ColorRGB,
 }
 
 impl Scene {
@@ -201,6 +210,7 @@ impl Default for Scene {
             models: vec![],
             lights: vec![Light::default()],
             camera: Camera::default(),
+            ambient: ColorRGB::new(25, 25, 25),
         }
     }
 }
