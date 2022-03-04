@@ -1,6 +1,3 @@
-pub mod render;
-pub mod encode;
-
 use glam::f32::Quat;
 use glam::{UVec3, Vec3, UVec2};
 use sdl2::event::Event;
@@ -12,8 +9,8 @@ use std::error::Error;
 
 use zercalo_format::scene::{ColorRGB, ColorRGBA, Light, Model, Scene};
 use zercalo_format::animation::RotationView;
-use crate::render::render_frames;
-use crate::encode::save_frames;
+use zercalo_render::render::render_frames;
+use zercalo_render::encode::save_frames;
 
 const TILE_SIZE: u32 = 64;
 const WINDOW_WIDTH: u32 = 1024;

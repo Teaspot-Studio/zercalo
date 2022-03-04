@@ -2,5 +2,6 @@
 
 members = [
     "zercalo-format",
-    "zercalo-render"
+    "zercalo-render",
+    "zercalo-viewer",
 ]

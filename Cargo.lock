@@ -633,3 +633,13 @@ dependencies = [
  "thiserror",
  "zercalo-format",
 ]
+
+[[package]]
+name = "zercalo-viewer"
+version = "0.1.0"
+dependencies = [
+ "glam 0.20.2",
+ "sdl2",
+ "zercalo-format",
+ "zercalo-render",
+]
