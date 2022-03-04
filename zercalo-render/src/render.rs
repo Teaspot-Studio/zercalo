@@ -1,5 +1,6 @@
 use fast_voxel_traversal::raycast_3d::*;
 use glam::{IVec3, UVec2, Vec3, Vec4};
+use log::*;
 use rayon::prelude::*;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
@@ -48,7 +49,7 @@ pub fn render_frames<'a, R: Renderable>(
         }
 
         canvas.with_multiple_texture_canvas(textures.iter(), |texture_canvas, frame| {
-            println!("Rendering frame {}/{}", frame, frames_count);
+            info!("Rendering frame {}/{}", frame, frames_count);
             texture_canvas.set_draw_color(Color::RGB(0, 0, 0));
             texture_canvas.clear();
             context.animate(*frame as u32);
@@ -125,7 +126,6 @@ pub fn render_frames<'a, R: Renderable>(
                                         break 'rayloop;
                                     }
                                 }
-                                // println!("model_dist = {}, total_dist = {}", model_dist, total_dist);
 
                                 if model_dist <= total_dist {
                                     total_color = blend_colors(model_color, total_color);

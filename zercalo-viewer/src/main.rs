@@ -1,5 +1,6 @@
 use glam::f32::Quat;
 use glam::{UVec2, UVec3, Vec3};
+use log::*;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -41,6 +42,8 @@ fn test_scene() -> RotationView<Scene> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    env_logger::init();
+
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
 
@@ -57,7 +60,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .build()
         .map_err(|e| e.to_string())?;
 
-    println!("Using SDL_Renderer \"{}\"", canvas.info().name);
+    info!("Using SDL_Renderer \"{}\"", canvas.info().name);
     canvas.set_scale(7.0, 7.0)?;
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();

@@ -1,4 +1,5 @@
 use glam::UVec2;
+use log::*;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
@@ -86,15 +87,15 @@ pub fn save_frames<'a>(
     tile_size: UVec2,
     directory: &str,
 ) -> Result<(), EncodeError> {
-    // let frames_count = frames.len();
+    let frames_count = frames.len();
     let mut textures = vec![];
     for (i, frame) in frames.iter_mut().enumerate() {
         textures.push((frame, i));
     }
 
     let mut frames_data = vec![];
-    canvas.with_multiple_texture_canvas(textures.iter(), |texture_canvas, _| {
-        // println!("Saving frame {}/{}", i, frames_count);
+    canvas.with_multiple_texture_canvas(textures.iter(), |texture_canvas, i| {
+        debug!("Saving frame {}/{}", i, frames_count);
         let pixels = texture_canvas
             .read_pixels(None, PixelFormatEnum::ABGR8888)
             .expect("Cannot read pixels from frame");
