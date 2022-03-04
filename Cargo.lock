@@ -629,6 +629,7 @@ dependencies = [
  "fast-voxel-traversal",
  "glam 0.20.2",
  "png 0.16.8",
+ "rayon",
  "sdl2",
  "thiserror",
  "zercalo-format",

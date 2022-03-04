@@ -13,3 +13,4 @@ png = "0.16.0"
 apng = "0.2.0"
 zercalo-format = { path = "../zercalo-format" }
 thiserror = "1.0.30"
+rayon = "1.5.1"
