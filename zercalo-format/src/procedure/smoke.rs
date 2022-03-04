@@ -1,5 +1,5 @@
 use glam::f32::Quat;
-use glam::{UVec3, Vec3, Vec4};
+use glam::{UVec3, Vec3};
 
 use crate::scene::{Model, ColorRGBA};
 

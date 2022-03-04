@@ -1,4 +1,6 @@
 pub mod render;
+pub mod encode;
+
 use glam::f32::Quat;
 use glam::{UVec3, Vec3, UVec2};
 use sdl2::event::Event;
@@ -6,10 +8,12 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::TextureCreator;
+use std::error::Error;
 
 use zercalo_format::scene::{ColorRGB, ColorRGBA, Light, Model, Scene};
 use zercalo_format::animation::RotationView;
-use crate::render::{render_frames, save_frames};
+use crate::render::render_frames;
+use crate::encode::save_frames;
 
 const TILE_SIZE: u32 = 64;
 const WINDOW_WIDTH: u32 = 1024;
@@ -40,7 +44,7 @@ fn test_scene() -> RotationView {
     }
 }
 
-fn main() -> Result<(), String> {
+fn main() -> Result<(), Box<dyn Error>> {
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
 
@@ -69,7 +73,7 @@ fn main() -> Result<(), String> {
     let texture_creator: TextureCreator<_> = canvas.texture_creator();
     let tile_size = UVec2::new(TILE_SIZE, TILE_SIZE);
     let mut frames = render_frames(&mut canvas, &texture_creator, FRAMES_COUNT, tile_size, scene)?;
-    save_frames(&mut canvas, &mut frames, tile_size)?;
+    save_frames(&mut canvas, &mut frames, tile_size, ".")?;
 
     let mut counter: u32 = 0;
     let mut frame = 0;

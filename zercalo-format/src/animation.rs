@@ -32,7 +32,6 @@ impl Renderable for RotationView {
         let quat = Quat::from_axis_angle(Vec3::Y, std::f32::consts::PI / 180.0);
 
         let target = self.scene.center();
-        println!("{:?}", target);
         self.scene.camera.eye = target + quat.mul_vec3(self.scene.camera.eye - target);
         self.scene.camera.dir = (target - self.scene.camera.eye).normalize();
     }
