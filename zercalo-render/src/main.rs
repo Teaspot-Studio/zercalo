@@ -47,7 +47,7 @@ fn save_png(str_path: &str, data: &[u8], width: u32, height: u32) {
 fn test_scene() -> Scene {
     let mut model1 = Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::white());
     model1.rotation = Quat::from_axis_angle(Vec3::X, std::f32::consts::PI / 6.0);
-    model1.offset = Vec3::new(5.0, 0.0, 0.0);
+    model1.offset = Vec3::new(5.0, 1.0, 0.0);
     let mut model2 = Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::white());
     model2.rotation = Quat::from_axis_angle(Vec3::X, -std::f32::consts::PI / 6.0);
     let light1 = Light {
@@ -154,7 +154,7 @@ fn render_frames<'a>(
                                 let mut light_component = Vec3::new(0.0, 0.0, 0.0);
                                 for light in scene.lights.iter() {
                                     let tolight: Vec3 =
-                                        (light.position - voxel.as_vec3()).normalize();
+                                        (rot_quat.mul_vec3(light.position) - voxel.as_vec3()).normalize();
                                     let new_component = diffuse.truncate()
                                         * light.color.as_vec3()
                                         * tolight.dot(normal);
