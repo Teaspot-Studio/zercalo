@@ -46,6 +46,10 @@ impl HasBounding for Scene {
     fn get_bounding_volume(&self) -> (Vec3, Vec3) {
         self.bounding()
     }
+
+    fn get_bounding_center(&self) -> Vec3 {
+        self.center()
+    }
 }
 
 pub struct RotationView<T> {
