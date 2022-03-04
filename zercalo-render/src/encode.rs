@@ -1,12 +1,12 @@
-use thiserror::Error;
+use glam::UVec2;
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::render::{Canvas, Texture};
+use sdl2::video::Window;
+use std::fs;
 use std::fs::File;
 use std::io::BufWriter;
 use std::path::Path;
-use std::fs;
-use glam::UVec2;
-use sdl2::render::{Canvas, Texture};
-use sdl2::video::{Window};
-use sdl2::pixels::PixelFormatEnum;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum EncodeError {
@@ -35,17 +35,25 @@ fn save_png(str_path: &str, data: &[u8], width: u32, height: u32) -> Result<(), 
     Ok(())
 }
 
-fn save_apng<'a, V : IntoIterator<Item = &'a [u8]>>(str_path: &str, data: V, width: u32, height: u32) -> Result<(), EncodeError> {
+fn save_apng<'a, V: IntoIterator<Item = &'a [u8]>>(
+    str_path: &str,
+    data: V,
+    width: u32,
+    height: u32,
+) -> Result<(), EncodeError> {
     let path = Path::new(str_path);
     let file = File::create(path)?;
     let mut w = BufWriter::new(file);
-    let images: Vec<apng::PNGImage> = data.into_iter().map(|datum| apng::PNGImage {
-        width,
-        height,
-        data: datum.to_vec(),
-        color_type: png::ColorType::RGBA,
-        bit_depth: png::BitDepth::Eight,
-    }).collect();
+    let images: Vec<apng::PNGImage> = data
+        .into_iter()
+        .map(|datum| apng::PNGImage {
+            width,
+            height,
+            data: datum.to_vec(),
+            color_type: png::ColorType::RGBA,
+            bit_depth: png::BitDepth::Eight,
+        })
+        .collect();
 
     let config = apng::Config {
         width,
@@ -60,14 +68,24 @@ fn save_apng<'a, V : IntoIterator<Item = &'a [u8]>>(str_path: &str, data: V, wid
         delay_den: Some(24),
         ..apng::Frame::default()
     };
-    let mut encoder = apng::Encoder::new(&mut w, config).map_err(|e| EncodeError::Apng(e.to_string()))?;
-    encoder.encode_all(images, Some(&frame_cfg)).map_err(|e| EncodeError::Apng(e.to_string()))?;
-    encoder.finish_encode().map_err(|e| EncodeError::Apng(e.to_string()))?;
+    let mut encoder =
+        apng::Encoder::new(&mut w, config).map_err(|e| EncodeError::Apng(e.to_string()))?;
+    encoder
+        .encode_all(images, Some(&frame_cfg))
+        .map_err(|e| EncodeError::Apng(e.to_string()))?;
+    encoder
+        .finish_encode()
+        .map_err(|e| EncodeError::Apng(e.to_string()))?;
 
     Ok(())
 }
 
-pub fn save_frames<'a>(canvas: &mut Canvas<Window>, frames: &mut [Texture<'a>], tile_size: UVec2, directory: &str) -> Result<(), EncodeError> {
+pub fn save_frames<'a>(
+    canvas: &mut Canvas<Window>,
+    frames: &mut [Texture<'a>],
+    tile_size: UVec2,
+    directory: &str,
+) -> Result<(), EncodeError> {
     // let frames_count = frames.len();
     let mut textures = vec![];
     for (i, frame) in frames.iter_mut().enumerate() {
@@ -75,8 +93,7 @@ pub fn save_frames<'a>(canvas: &mut Canvas<Window>, frames: &mut [Texture<'a>], 
     }
 
     let mut frames_data = vec![];
-    canvas
-    .with_multiple_texture_canvas(textures.iter(), |texture_canvas, _| {
+    canvas.with_multiple_texture_canvas(textures.iter(), |texture_canvas, _| {
         // println!("Saving frame {}/{}", i, frames_count);
         let pixels = texture_canvas
             .read_pixels(None, PixelFormatEnum::ABGR8888)

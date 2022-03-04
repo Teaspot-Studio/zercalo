@@ -14,9 +14,7 @@ pub trait Renderable {
 
 /// We always can render static scene
 impl Renderable for Scene {
-    fn animate(&mut self, _frame: u32) {
-
-    }
+    fn animate(&mut self, _frame: u32) {}
 
     fn render(&self) -> &Scene {
         self
@@ -24,7 +22,7 @@ impl Renderable for Scene {
 }
 
 pub struct RotationView {
-    pub scene: Scene
+    pub scene: Scene,
 }
 
 impl Renderable for RotationView {

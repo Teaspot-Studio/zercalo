@@ -1,7 +1,7 @@
 use glam::f32::Quat;
 use glam::{UVec3, Vec3};
 
-use crate::scene::{Model, ColorRGBA};
+use crate::scene::{ColorRGBA, Model};
 
 pub struct SmokePart {
     pub offset: Vec3,
@@ -21,7 +21,7 @@ impl SmokeModel {
         let mut model = Model::from_function(self.size, |pos| {
             for part in self.particles.iter() {
                 let d2 = (self.offset + part.offset - pos.as_vec3()).length_squared();
-                if d2 < part.radius*part.radius {
+                if d2 < part.radius * part.radius {
                     return ColorRGBA::new(150, 150, 150, 255);
                 }
             }
@@ -40,4 +40,3 @@ impl SmokeModel {
         }
     }
 }
-

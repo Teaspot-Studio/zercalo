@@ -1,5 +1,5 @@
 use glam::f32::Quat;
-use glam::{UVec3, Vec3, UVec2};
+use glam::{UVec2, UVec3, Vec3};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -7,10 +7,10 @@ use sdl2::rect::Rect;
 use sdl2::render::TextureCreator;
 use std::error::Error;
 
-use zercalo_format::scene::{ColorRGB, ColorRGBA, Light, Model, Scene};
 use zercalo_format::animation::RotationView;
-use zercalo_render::render::render_frames;
+use zercalo_format::scene::{ColorRGB, ColorRGBA, Light, Model, Scene};
 use zercalo_render::encode::save_frames;
+use zercalo_render::render::render_frames;
 
 const TILE_SIZE: u32 = 64;
 const WINDOW_WIDTH: u32 = 1024;
@@ -18,7 +18,8 @@ const WINDOW_HEIGHT: u32 = 1024;
 const FRAMES_COUNT: u32 = 256;
 
 fn test_scene() -> RotationView {
-    let mut model1 = Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::new(200, 100, 0, 255));
+    let mut model1 =
+        Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::new(200, 100, 0, 255));
     model1.rotation = Quat::from_axis_angle(Vec3::X, std::f32::consts::PI / 6.0);
     model1.offset = Vec3::new(5.0, 1.0, 0.0);
     let mut model2 = Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::white());
@@ -36,9 +37,7 @@ fn test_scene() -> RotationView {
         lights: vec![light1, light2],
         ..Scene::default()
     };
-    RotationView {
-        scene
-    }
+    RotationView { scene }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -69,7 +68,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut event_pump = sdl_context.event_pump()?;
     let texture_creator: TextureCreator<_> = canvas.texture_creator();
     let tile_size = UVec2::new(TILE_SIZE, TILE_SIZE);
-    let mut frames = render_frames(&mut canvas, &texture_creator, FRAMES_COUNT, tile_size, scene)?;
+    let mut frames = render_frames(
+        &mut canvas,
+        &texture_creator,
+        FRAMES_COUNT,
+        tile_size,
+        scene,
+    )?;
     save_frames(&mut canvas, &mut frames, tile_size, ".")?;
 
     let mut counter: u32 = 0;

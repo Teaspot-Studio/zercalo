@@ -191,7 +191,7 @@ impl Scene {
     /// Get center of bounding volume of all scene
     pub fn center(&self) -> Vec3 {
         let (minv, maxv) = self.bounding();
-        (maxv-minv)*0.5
+        (maxv - minv) * 0.5
     }
 }
 
