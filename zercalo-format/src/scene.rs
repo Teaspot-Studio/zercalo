@@ -141,6 +141,8 @@ impl Index<UVec3> for Model {
 
 /// Defines distance between each pixel ray. Effectively scales image
 const DEFAULT_PIXEL_SIZE: f32 = 0.7;
+/// Defines maximum distance ray can travel before it considered as going to infininity.
+const DEFAULT_RAY_MAX_DIST: f32 = 100.0;
 
 #[derive(Clone, Debug)]
 pub struct Camera {
@@ -148,6 +150,7 @@ pub struct Camera {
     pub dir: Vec3,
     pub up: Vec3,
     pub pixel_size: f32,
+    pub max_dist: f32,
 }
 
 impl Default for Camera {
@@ -158,6 +161,7 @@ impl Default for Camera {
             dir: -eye.normalize(),
             up: Vec3::new(0.0, 1.0, 0.0),
             pixel_size: DEFAULT_PIXEL_SIZE,
+            max_dist: DEFAULT_RAY_MAX_DIST,
         }
     }
 }
@@ -167,6 +171,28 @@ pub struct Scene {
     pub models: Vec<Model>,
     pub lights: Vec<Light>,
     pub camera: Camera,
+}
+
+impl Scene {
+    /// Get bounding volume of all scene
+    pub fn bounding(&self) -> (Vec3, Vec3) {
+        let minv = std::f32::MIN;
+        let maxv = std::f32::MAX;
+        let mut max_vec = Vec3::new(minv, minv, minv);
+        let mut min_vec = Vec3::new(maxv, maxv, maxv);
+
+        for m in self.models.iter() {
+            min_vec = min_vec.min(m.offset);
+            max_vec = max_vec.max(m.offset + m.rotation.mul_vec3(m.size.as_vec3()));
+        }
+        (min_vec, max_vec)
+    }
+
+    /// Get center of bounding volume of all scene
+    pub fn center(&self) -> Vec3 {
+        let (minv, maxv) = self.bounding();
+        (maxv-minv)*0.5
+    }
 }
 
 impl Default for Scene {
