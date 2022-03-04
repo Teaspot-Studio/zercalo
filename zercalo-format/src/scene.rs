@@ -1,5 +1,8 @@
-use glam::{UVec3, Vec3};
+use glam::f32::Quat;
+use glam::{UVec3, Vec3, Vec4};
+use std::ops::Index;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ColorRGB {
     pub r: u8,
     pub g: u8,
@@ -20,6 +23,67 @@ impl ColorRGB {
     }
 }
 
+impl Default for ColorRGB {
+    fn default() -> Self {
+        ColorRGB::new(0, 0, 0)
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ColorRGBA {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: u8,
+}
+
+impl ColorRGBA {
+    pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
+        ColorRGBA { r, g, b, a }
+    }
+
+    pub fn as_vec4(&self) -> Vec4 {
+        Vec4::new(
+            (self.r as f32) / 255.0,
+            (self.g as f32) / 255.0,
+            (self.b as f32) / 255.0,
+            (self.a as f32) / 255.0,
+        )
+    }
+
+    pub fn empty() -> Self {
+        ColorRGBA::new(0, 0, 0, 0)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.a == 0
+    }
+
+    pub fn white() -> Self {
+        ColorRGBA::new(255, 255, 255, 255)
+    }
+
+    pub fn black() -> Self {
+        ColorRGBA::new(0, 0, 0, 255)
+    }
+
+    pub fn with_alpha(&self, a: u8) -> Self {
+        ColorRGBA {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a,
+        }
+    }
+}
+
+impl Default for ColorRGBA {
+    fn default() -> Self {
+        ColorRGBA::new(0, 0, 0, 255)
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct Light {
     pub position: Vec3,
     pub color: ColorRGB,
@@ -34,13 +98,51 @@ impl Default for Light {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Model {
     pub size: UVec3,
+    pub voxels: Vec<ColorRGBA>,
+    pub offset: Vec3,
+    pub rotation: Quat,
+}
+
+impl Model {
+    /// Generate model volume procedurely
+    pub fn from_function<F>(size: UVec3, mut generator: F) -> Self
+    where
+        F: FnMut(UVec3) -> ColorRGBA,
+    {
+        let mut voxels = vec![ColorRGBA::empty(); (size.x * size.y * size.z) as usize];
+        for x in 0..size.x {
+            for y in 0..size.y {
+                for z in 0..size.z {
+                    let i = x + y * size.y + z * size.x * size.y;
+                    voxels[i as usize] = generator(UVec3::new(x, y, z));
+                }
+            }
+        }
+        Model {
+            size,
+            voxels,
+            offset: Vec3::new(0.0, 0.0, 0.0),
+            rotation: Quat::from_axis_angle(Vec3::Y, 0.0),
+        }
+    }
+}
+
+impl Index<UVec3> for Model {
+    type Output = ColorRGBA;
+
+    fn index(&self, index: UVec3) -> &Self::Output {
+        let i = index.x + index.y * self.size.y + index.z * self.size.x * self.size.y;
+        &self.voxels[i as usize]
+    }
 }
 
 /// Defines distance between each pixel ray. Effectively scales image
 const DEFAULT_PIXEL_SIZE: f32 = 0.7;
 
+#[derive(Clone, Debug)]
 pub struct Camera {
     pub eye: Vec3,
     pub dir: Vec3,
@@ -60,6 +162,7 @@ impl Default for Camera {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Scene {
     pub models: Vec<Model>,
     pub lights: Vec<Light>,

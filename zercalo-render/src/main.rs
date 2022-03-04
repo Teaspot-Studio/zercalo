@@ -1,6 +1,6 @@
 use fast_voxel_traversal::raycast_3d::*;
 use glam::f32::Quat;
-use glam::{IVec3, UVec3, Vec3};
+use glam::{IVec3, UVec3, Vec3, Vec4};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
@@ -11,7 +11,7 @@ use std::fs::File;
 use std::io::BufWriter;
 use std::path::Path;
 
-use zercalo_format::scene::{Model, Scene, Light, ColorRGB};
+use zercalo_format::scene::{ColorRGB, ColorRGBA, Light, Model, Scene};
 
 const TILE_SIZE: u32 = 64;
 const WINDOW_WIDTH: u32 = 1024;
@@ -19,6 +19,7 @@ const WINDOW_HEIGHT: u32 = 1024;
 const PIXEL_SIZE: f32 = 0.7;
 const FRAMES_COUNT: u32 = 256;
 const VOLUME_SIZE: u32 = 16;
+const RAY_MAX_DIST: f32 = 100.0;
 
 fn save_png(str_path: &str, data: &[u8], width: u32, height: u32) {
     let path = Path::new(str_path);
@@ -44,9 +45,11 @@ fn save_png(str_path: &str, data: &[u8], width: u32, height: u32) {
 }
 
 fn test_scene() -> Scene {
-    let model = Model {
-        size: UVec3::new(16, 16, 16),
-    };
+    let mut model1 = Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::white());
+    model1.rotation = Quat::from_axis_angle(Vec3::X, std::f32::consts::PI / 6.0);
+    model1.offset = Vec3::new(5.0, 0.0, 0.0);
+    let mut model2 = Model::from_function(UVec3::new(16, 16, 16), |_| ColorRGBA::white());
+    model2.rotation = Quat::from_axis_angle(Vec3::X, -std::f32::consts::PI / 6.0);
     let light1 = Light {
         position: Vec3::new(25.0, 20.0, 20.0),
         color: ColorRGB::new(255, 230, 230),
@@ -56,7 +59,7 @@ fn test_scene() -> Scene {
         color: ColorRGB::new(210, 210, 255),
     };
     Scene {
-        models: vec![model],
+        models: vec![model1, model2],
         lights: vec![light1, light2],
         ..Scene::default()
     }
@@ -69,6 +72,17 @@ fn animate_scene(scene: &mut Scene, _frame: u32) {
     let target = Vec3::new(halfsize, halfsize, halfsize);
     scene.camera.eye = target + quat.mul_vec3(scene.camera.eye - target);
     scene.camera.dir = (target - scene.camera.eye).normalize();
+}
+
+fn blend_colors(src: Vec4, dst: Vec4) -> Vec4 {
+    let dist_factor = dst.w * (1.0 - src.w);
+    let mut res = src;
+    res *= src.w;
+    res.x += dst.x * dist_factor;
+    res.y += dst.y * dist_factor;
+    res.z += dst.z * dist_factor;
+    res.w += dist_factor;
+    res
 }
 
 fn render_frames<'a>(
@@ -100,19 +114,27 @@ fn render_frames<'a>(
 
                 for i in 0..TILE_SIZE {
                     for j in 0..TILE_SIZE {
-
-                        let right = scene.camera.dir.cross(scene.camera.up);
-                        let offset = scene.camera.up
-                            * ((j as f32 - 0.5 * TILE_SIZE as f32) * PIXEL_SIZE)
-                            + right * ((i as f32 - 0.5 * TILE_SIZE as f32) * PIXEL_SIZE);
-
-                        let ray = Ray3 {
-                            origin: (scene.camera.eye + offset).into(),
-                            direction: scene.camera.dir.into(),
-                            length: 100.0,
-                        };
-
+                        // Total accumulated color for model
+                        let mut total_color = Vec4::new(0.0, 0.0, 0.0, 0.0);
+                        // The last distance ray traveled until full stop. It is used to cull other models.
+                        let mut total_dist = RAY_MAX_DIST;
                         for model in scene.models.iter() {
+                            let rot_quat = model.rotation.inverse();
+                            let eye = rot_quat.mul_vec3(scene.camera.eye);
+                            let up = rot_quat.mul_vec3(scene.camera.up);
+                            let dir = rot_quat.mul_vec3(scene.camera.dir);
+
+                            let right = dir.cross(up);
+                            let offset = up * ((j as f32 - 0.5 * TILE_SIZE as f32) * PIXEL_SIZE)
+                                + right * ((i as f32 - 0.5 * TILE_SIZE as f32) * PIXEL_SIZE);
+
+                            let ray_origin = eye - model.offset + offset;
+                            let ray = Ray3 {
+                                origin: ray_origin.into(),
+                                direction: dir.into(),
+                                length: RAY_MAX_DIST,
+                            };
+
                             let volume = BoundingVolume3 {
                                 size: (
                                     model.size.x as i32,
@@ -121,31 +143,48 @@ fn render_frames<'a>(
                                 ),
                             };
 
-                            for hit in volume.traverse_ray(ray).take(1) {
-                                // println!("{:?}", hit);
+                            let mut model_color = Vec4::new(0.0, 0.0, 0.0, 0.0);
+                            let mut model_dist = RAY_MAX_DIST;
+                            'rayloop: for hit in volume.traverse_ray(ray) {
                                 let inormal: IVec3 = hit.normal.unwrap_or((1, 0, 0)).into();
                                 let normal: Vec3 = inormal.as_vec3();
                                 let voxel: IVec3 = hit.voxel.into();
+                                let diffuse: Vec4 = model[voxel.as_uvec3()].as_vec4();
 
                                 let mut light_component = Vec3::new(0.0, 0.0, 0.0);
                                 for light in scene.lights.iter() {
                                     let tolight: Vec3 =
                                         (light.position - voxel.as_vec3()).normalize();
-                                    let new_component = light.color.as_vec3() * tolight.dot(normal);
+                                    let new_component = diffuse.truncate()
+                                        * light.color.as_vec3()
+                                        * tolight.dot(normal);
                                     light_component += new_component.max(Vec3::new(0.0, 0.0, 0.0));
                                 }
-                                println!("{:?}", light_component);
 
-                                texture_canvas.set_draw_color(Color::RGB(
-                                    (light_component.x * 255.0) as u8,
-                                    (light_component.y * 255.0) as u8,
-                                    (light_component.z * 255.0) as u8,
-                                ));
-                                texture_canvas
-                                    .draw_point(Point::new(i as i32, (TILE_SIZE - j) as i32))
-                                    .expect("could not draw point");
+                                model_color = blend_colors(model_color, (light_component, diffuse.w).into());
+                                model_dist = (ray_origin - voxel.as_vec3()).length();
+                                if model_color.w >= 1.0 {
+                                    break 'rayloop;
+                                }
+                            }
+                            // println!("model_dist = {}, total_dist = {}", model_dist, total_dist);
+
+                            if model_dist <= total_dist {
+                                total_color = blend_colors(model_color, total_color);
+                                total_dist = model_dist;
+                            } else {
+                                total_color = blend_colors(total_color, model_color);
                             }
                         }
+
+                        texture_canvas.set_draw_color(Color::RGB(
+                            (total_color.x * 255.0) as u8,
+                            (total_color.y * 255.0) as u8,
+                            (total_color.z * 255.0) as u8,
+                        ));
+                        texture_canvas
+                            .draw_point(Point::new(i as i32, (TILE_SIZE - j) as i32))
+                            .expect("could not draw point");
                     }
                 }
             })
