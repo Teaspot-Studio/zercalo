@@ -37,7 +37,11 @@ pub fn render_frames<'a, R: Renderable>(
 ) -> Result<Vec<Texture<'a>>, RenderError> {
     let mut frames = vec![];
     for _ in 0..frames_count {
-        let frame = texture_creator.create_texture_target(Some(PixelFormatEnum::RGBA8888), tile_size.x, tile_size.y)?;
+        let frame = texture_creator.create_texture_target(
+            Some(PixelFormatEnum::RGBA8888),
+            tile_size.x,
+            tile_size.y,
+        )?;
         frames.push(frame);
     }
 
@@ -115,7 +119,8 @@ pub fn render_frames<'a, R: Renderable>(
                                         light_component +=
                                             new_component.max(Vec3::new(0.0, 0.0, 0.0));
                                     }
-                                    let ambient_component = diffuse.truncate() * scene.ambient.as_vec3();
+                                    let ambient_component =
+                                        diffuse.truncate() * scene.ambient.as_vec3();
                                     model_color = blend_colors(
                                         model_color,
                                         (ambient_component + light_component, diffuse.w).into(),
