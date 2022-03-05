@@ -44,6 +44,17 @@ impl HasMutScene for Scene {
 }
 
 /// Trait that allows to access substate with camera
+pub trait HasCamera {
+    fn get_camera(& self) -> &Camera;
+}
+
+impl HasCamera for Scene {
+    fn get_camera(& self) -> &Camera {
+        &self.camera
+    }
+}
+
+/// Trait that allows to access substate with camera
 pub trait HasMutCamera {
     fn get_mut_camera(&mut self) -> &mut Camera;
 }
@@ -78,6 +89,30 @@ pub struct RotationView<T> {
     pub scene: T,
     pub target_y: Option<f32>,
     pub rotation_speed: f32,
+}
+
+impl<T: HasCamera> HasCamera for RotationView<T> {
+    fn get_camera(&self) -> &Camera {
+        self.scene.get_camera()
+    }
+}
+
+impl<T: HasMutCamera> HasMutCamera for RotationView<T> {
+    fn get_mut_camera(&mut self) -> &mut Camera {
+        self.scene.get_mut_camera()
+    }
+}
+
+impl<T: HasBounding> HasBounding for RotationView<T> {
+    fn get_bounding_volume(&self) -> (Vec3, Vec3) {
+        self.scene.get_bounding_volume()
+    }
+}
+
+impl<T: HasScene> HasScene for RotationView<T> {
+    fn get_scene(&self) -> &Scene {
+        self.scene.get_scene()
+    }
 }
 
 impl<T: Renderable + HasMutCamera + HasBounding> Renderable for RotationView<T> {

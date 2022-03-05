@@ -1,5 +1,6 @@
 use glam::f32::Quat;
-use glam::{UVec3, Vec3, Vec4};
+use glam::{UVec2, UVec3, Vec3, Vec4};
+use rayon::prelude::*;
 use std::ops::Index;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -116,19 +117,30 @@ pub struct Model {
 
 impl Model {
     /// Generate model volume procedurely
-    pub fn from_function<F>(size: UVec3, mut generator: F) -> Self
+    pub fn from_function<F>(size: UVec3, generator: F) -> Self
     where
-        F: FnMut(UVec3) -> ColorRGBA,
+        F: FnMut(UVec3) -> ColorRGBA + Send + Sync + Clone,
     {
-        let mut voxels = vec![ColorRGBA::empty(); (size.x * size.y * size.z) as usize];
-        for x in 0..size.x {
-            for y in 0..size.y {
-                for z in 0..size.z {
-                    let i = x + y * size.x + z * size.x * size.y;
-                    voxels[i as usize] = generator(UVec3::new(x, y, z));
-                }
-            }
-        }
+        let mut layers = vec![];
+        (0..size.x)
+            .into_par_iter()
+            .map(|x| {
+                let mut columns = vec![];
+                (0..size.y)
+                    .into_par_iter()
+                    .map(|y| {
+                        let mut column = vec![ColorRGBA::empty(); size.z as usize];
+                        for z in 0..size.z {
+                            column[z as usize] = generator.clone()(UVec3::new(x, y, z));
+                        }
+                        column
+                    })
+                    .collect_into_vec(&mut columns);
+                columns
+            })
+            .collect_into_vec(&mut layers);
+
+        let voxels: Vec<ColorRGBA> = layers.into_iter().flatten().flatten().collect();
         Model {
             size,
             voxels,
@@ -148,9 +160,13 @@ impl Index<UVec3> for Model {
 }
 
 /// Defines distance between each pixel ray. Effectively scales image
-const DEFAULT_PIXEL_SIZE: f32 = 0.7;
+pub const DEFAULT_PIXEL_SIZE: f32 = 0.7;
 /// Defines maximum distance ray can travel before it considered as going to infininity.
-const DEFAULT_RAY_MAX_DIST: f32 = 1024.0;
+pub const DEFAULT_RAY_MAX_DIST: f32 = 1024.0;
+/// Default width of rendered tile
+pub const DEFAULT_TILE_WIDTH: u32 = 64;
+/// Default height of rendered tile
+pub const DEFAULT_TILE_HEIGHT: u32 = 64;
 
 #[derive(Clone, Debug)]
 pub struct Camera {
@@ -159,6 +175,7 @@ pub struct Camera {
     pub up: Vec3,
     pub pixel_size: f32,
     pub max_dist: f32,
+    pub viewport: UVec2,
 }
 
 impl Default for Camera {
@@ -170,6 +187,7 @@ impl Default for Camera {
             up: Vec3::new(0.0, 1.0, 0.0),
             pixel_size: DEFAULT_PIXEL_SIZE,
             max_dist: DEFAULT_RAY_MAX_DIST,
+            viewport: UVec2::new(DEFAULT_TILE_WIDTH, DEFAULT_TILE_HEIGHT),
         }
     }
 }

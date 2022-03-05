@@ -6,5 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dot_vox = "4.1.0"
 glam = "0.20.2"
 noise = "0.7.0"
+rayon = "1.5.1"
+thiserror = "1.0.30"

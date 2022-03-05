@@ -1,24 +1,25 @@
-use glam::Vec3;
-use zercalo_format::animation::{HasBounding, HasMutCamera, Renderable, RotationView};
+use glam::{UVec2, Vec3};
+use zercalo_format::animation::{HasBounding, HasCamera, HasMutCamera, Renderable, RotationView};
 use zercalo_format::procedure::smoke::SmokeModel;
 use zercalo_format::scene::{Camera, ColorRGB, Light, Scene};
 
-pub struct TestScene {
+pub struct SmokeScene {
     smoke: SmokeModel,
     /// Scene is cached to store voxels for renderer
     rendered: Scene,
 }
 
-impl TestScene {
-    pub fn new() -> RotationView<TestScene> {
+impl SmokeScene {
+    pub fn new() -> RotationView<SmokeScene> {
         let model = SmokeModel::default();
         let eye = Vec3::new(128., 128., 128.);
-        let mut scene = TestScene {
+        let mut scene = SmokeScene {
             smoke: model,
             rendered: Scene {
                 camera: Camera {
                     eye,
                     dir: -eye.normalize(),
+                    viewport: UVec2::new(64, 128),
                     ..Camera::default()
                 },
                 lights: vec![Light {
@@ -37,13 +38,19 @@ impl TestScene {
     }
 }
 
-impl HasMutCamera for TestScene {
-    fn get_mut_camera(&'_ mut self) -> &'_ mut Camera {
+impl HasCamera for SmokeScene {
+    fn get_camera(& self) -> & Camera {
+        &self.rendered.camera
+    }
+}
+
+impl HasMutCamera for SmokeScene {
+    fn get_mut_camera(&mut self) -> &mut Camera {
         &mut self.rendered.camera
     }
 }
 
-impl Renderable for TestScene {
+impl Renderable for SmokeScene {
     fn animate(&mut self, frame: u32) {
         self.smoke.animate(frame);
         self.rendered.models = vec![self.smoke.generate()];
@@ -54,7 +61,7 @@ impl Renderable for TestScene {
     }
 }
 
-impl HasBounding for TestScene {
+impl HasBounding for SmokeScene {
     fn get_bounding_volume(&self) -> (Vec3, Vec3) {
         self.rendered.bounding()
     }

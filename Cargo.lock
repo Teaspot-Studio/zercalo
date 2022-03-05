@@ -187,6 +187,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dot_vox"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83c18405ef54de0398b77a3ec8394d3a1639e7bf060e1385201e8db40c44ab41"
+dependencies = [
+ "byteorder",
+ "lazy_static",
+ "log",
+ "nom",
+]
+
+[[package]]
 name = "either"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -436,6 +448,16 @@ dependencies = [
  "image 0.23.14",
  "rand",
  "rand_xorshift",
+]
+
+[[package]]
+name = "nom"
+version = "4.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ad2a91a8e869eeb30b9cb3119ae87773a8f4ae617f41b1eb9c154b2905f7bd6"
+dependencies = [
+ "memchr",
+ "version_check",
 ]
 
 [[package]]
@@ -824,6 +846,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fe88247b92c1df6b6de80ddc290f3976dbdf2f5f5d3fd049a9fb598c6dd5ca73"
 
 [[package]]
+name = "version_check"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "914b1a6776c4c929a602fafd8bc742e06365d4bcbe48c30f9cca5824f70dc9dd"
+
+[[package]]
 name = "wasi"
 version = "0.9.0+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -870,8 +898,11 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 name = "zercalo-format"
 version = "0.1.0"
 dependencies = [
+ "dot_vox",
  "glam 0.20.2",
  "noise",
+ "rayon",
+ "thiserror",
 ]
 
 [[package]]

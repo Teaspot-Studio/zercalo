@@ -1,6 +1,5 @@
 pub mod scenes;
 
-use glam::UVec2;
 use log::*;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -12,9 +11,8 @@ use std::error::Error;
 use crate::scenes::*;
 use zercalo_render::encode::save_frames;
 use zercalo_render::render::render_frames;
+use zercalo_format::animation::HasCamera;
 
-const TILE_WIDTH: u32 = 64;
-const TILE_HEIGHT: u32 = 128;
 const WINDOW_WIDTH: u32 = 1024;
 const WINDOW_HEIGHT: u32 = 1024;
 const FRAMES_COUNT: u32 = 512;
@@ -44,11 +42,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     canvas.clear();
     canvas.present();
 
-    let scene = TestScene::new();
+    let scene = new_teapot_scene()?;
+    // let scene = SmokeScene::new();
 
     let mut event_pump = sdl_context.event_pump()?;
     let texture_creator: TextureCreator<_> = canvas.texture_creator();
-    let tile_size = UVec2::new(TILE_WIDTH, TILE_HEIGHT);
+    let tile_size = scene.get_camera().viewport;
     let mut frames = render_frames(
         &mut canvas,
         &texture_creator,
@@ -87,10 +86,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             &frames[frame],
             None,
             Rect::new(
-                ((WINDOW_WIDTH as f32 / (2.0 * sx)) as u32 - TILE_WIDTH / 2) as i32,
-                ((WINDOW_HEIGHT as f32 / (2.0 * sy)) as u32 - TILE_HEIGHT / 2) as i32,
-                TILE_WIDTH,
-                TILE_HEIGHT,
+                ((WINDOW_WIDTH as f32 / (2.0 * sx)) as u32 - tile_size.x / 2) as i32,
+                ((WINDOW_HEIGHT as f32 / (2.0 * sy)) as u32 - tile_size.y / 2) as i32,
+                tile_size.x,
+                tile_size.y,
             ),
         )?;
         canvas.present();
