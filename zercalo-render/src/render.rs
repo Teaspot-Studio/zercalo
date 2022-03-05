@@ -106,7 +106,12 @@ pub fn render_frames<'a, R: Renderable>(
                                     let inormal: IVec3 = hit.normal.unwrap_or((1, 0, 0)).into();
                                     let normal: Vec3 = inormal.as_vec3();
                                     let voxel: IVec3 = hit.voxel.into();
-                                    let diffuse: Vec4 = model[voxel.as_uvec3()].as_vec4();
+                                    let diffuse_orig = model[voxel.as_uvec3()];
+                                    let diffuse = model
+                                        .replace_colors
+                                        .get(&diffuse_orig)
+                                        .unwrap_or(&diffuse_orig)
+                                        .as_vec4();
 
                                     let mut light_component = Vec3::new(0.0, 0.0, 0.0);
                                     for light in scene.lights.iter() {

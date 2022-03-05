@@ -1,6 +1,7 @@
 use crate::scene::{ColorRGBA, Model};
-use glam::f32::Quat;
 use glam::{UVec3, Vec3};
+use glam::f32::Quat;
+use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -49,6 +50,7 @@ pub fn from_vox_model(pallete: &[u32], vox_model: &dot_vox::Model) -> Model {
         voxels,
         offset: Vec3::new(0.0, 0.0, 0.0),
         rotation: Quat::from_axis_angle(Vec3::Y, 0.0),
+        replace_colors: HashMap::new(),
     }
 }
 

@@ -12,6 +12,7 @@ use crate::scenes::*;
 use zercalo_render::encode::save_frames;
 use zercalo_render::render::render_frames;
 use zercalo_format::animation::HasCamera;
+use zercalo_format::scene::ColorRGBA;
 
 const WINDOW_WIDTH: u32 = 1024;
 const WINDOW_HEIGHT: u32 = 1024;
@@ -41,7 +42,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     canvas.clear();
     canvas.present();
 
-    let scene = new_harvester_scene()?;
+    let scene = new_harvester_scene(ColorRGBA::player1())?;
     // let scene = SmokeScene::new();
 
     let mut event_pump = sdl_context.event_pump()?;

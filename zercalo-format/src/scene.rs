@@ -1,6 +1,7 @@
-use glam::f32::Quat;
 use glam::{UVec2, UVec3, Vec2, Vec3, Vec4};
+use glam::f32::Quat;
 use rayon::prelude::*;
+use std::collections::HashMap;
 use std::ops::Index;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -84,6 +85,14 @@ impl ColorRGBA {
             a,
         }
     }
+
+    pub fn player1() -> Self {
+        ColorRGBA::new(240, 0, 0, 255)
+    }
+
+    pub fn player2() -> Self {
+        ColorRGBA::new(0, 0, 240, 255)
+    }
 }
 
 impl Default for ColorRGBA {
@@ -113,6 +122,7 @@ pub struct Model {
     pub voxels: Vec<ColorRGBA>,
     pub offset: Vec3,
     pub rotation: Quat,
+    pub replace_colors: HashMap<ColorRGBA, ColorRGBA>,
 }
 
 impl Model {
@@ -146,6 +156,7 @@ impl Model {
             voxels,
             offset: Vec3::new(0.0, 0.0, 0.0),
             rotation: Quat::from_axis_angle(Vec3::Y, 0.0),
+            replace_colors: HashMap::new(),
         }
     }
 }
