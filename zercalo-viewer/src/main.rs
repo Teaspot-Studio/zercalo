@@ -37,7 +37,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         .map_err(|e| e.to_string())?;
 
     info!("Using SDL_Renderer \"{}\"", canvas.info().name);
-    canvas.set_scale(7.0, 7.0)?;
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
     canvas.present();
@@ -47,7 +46,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut event_pump = sdl_context.event_pump()?;
     let texture_creator: TextureCreator<_> = canvas.texture_creator();
-    let tile_size = scene.get_camera().viewport;
+    let cam = scene.get_camera();
+    let tile_size = cam.viewport;
+    canvas.set_scale(cam.view_scale.x, cam.view_scale.y)?;
     let mut frames = render_frames(
         &mut canvas,
         &texture_creator,

@@ -1,5 +1,5 @@
 use glam::f32::Quat;
-use glam::{UVec2, UVec3, Vec3, Vec4};
+use glam::{UVec2, UVec3, Vec2, Vec3, Vec4};
 use rayon::prelude::*;
 use std::ops::Index;
 
@@ -175,7 +175,10 @@ pub struct Camera {
     pub up: Vec3,
     pub pixel_size: f32,
     pub max_dist: f32,
+    /// Size of resulted tile in pixels
     pub viewport: UVec2,
+    /// How much the tile should be scaled
+    pub view_scale: Vec2,
 }
 
 impl Default for Camera {
@@ -188,6 +191,7 @@ impl Default for Camera {
             pixel_size: DEFAULT_PIXEL_SIZE,
             max_dist: DEFAULT_RAY_MAX_DIST,
             viewport: UVec2::new(DEFAULT_TILE_WIDTH, DEFAULT_TILE_HEIGHT),
+            view_scale: Vec2::new(7.0, 7.0),
         }
     }
 }

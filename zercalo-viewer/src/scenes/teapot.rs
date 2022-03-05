@@ -1,4 +1,4 @@
-use glam::{UVec2, Vec3};
+use glam::{UVec2, Vec2, Vec3};
 use zercalo_format::animation::RotationView;
 use zercalo_format::scene::{Camera, ColorRGB, Light, Scene};
 use zercalo_format::import::vox::{from_vox_file, VoxImportError};
@@ -15,6 +15,7 @@ pub fn new_teapot_scene() -> Result<TeapotScene, VoxImportError> {
             dir: -eye.normalize(),
             pixel_size: 1.0,
             viewport: UVec2::new(256, 256),
+            view_scale: Vec2::new(2.0, 2.0),
             ..Camera::default()
         },
         lights: vec![Light {
