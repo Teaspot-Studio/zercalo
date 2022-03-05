@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     canvas.clear();
     canvas.present();
 
-    let scene = new_teapot_scene()?;
+    let scene = new_harvester_scene()?;
     // let scene = SmokeScene::new();
 
     let mut event_pump = sdl_context.event_pump()?;

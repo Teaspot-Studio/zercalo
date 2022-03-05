@@ -56,8 +56,8 @@ pub fn from_vox_model(pallete: &[u32], vox_model: &dot_vox::Model) -> Model {
 pub fn vox_color_to_rgba(c: u32) -> ColorRGBA {
     ColorRGBA::new(
         (c & 0xFF) as u8,
-        ((c >> 4) & 0xFF) as u8,
         ((c >> 8) & 0xFF) as u8,
         ((c >> 16) & 0xFF) as u8,
+        ((c >> 24) & 0xFF) as u8
     )
 }
