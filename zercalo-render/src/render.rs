@@ -2,7 +2,7 @@ use fast_voxel_traversal::raycast_3d::*;
 use glam::{IVec3, UVec2, Vec3, Vec4};
 use log::*;
 use rayon::prelude::*;
-use sdl2::pixels::Color;
+use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::Point;
 use sdl2::render::{Canvas, Texture, TextureCreator};
 use sdl2::video::{Window, WindowContext};
@@ -21,10 +21,9 @@ pub enum RenderError {
 fn blend_colors(src: Vec4, dst: Vec4) -> Vec4 {
     let dist_factor = dst.w * (1.0 - src.w);
     let mut res = src;
-    res *= src.w;
-    res.x += dst.x * dist_factor;
-    res.y += dst.y * dist_factor;
-    res.z += dst.z * dist_factor;
+    res.x = src.x * src.w + dst.x * dist_factor;
+    res.y = src.y * src.w + dst.y * dist_factor;
+    res.z = src.z * src.w + dst.z * dist_factor;
     res.w += dist_factor;
     res
 }
@@ -38,7 +37,7 @@ pub fn render_frames<'a, R: Renderable>(
 ) -> Result<Vec<Texture<'a>>, RenderError> {
     let mut frames = vec![];
     for _ in 0..frames_count {
-        let frame = texture_creator.create_texture_target(None, tile_size.x, tile_size.y)?;
+        let frame = texture_creator.create_texture_target(Some(PixelFormatEnum::RGBA8888), tile_size.x, tile_size.y)?;
         frames.push(frame);
     }
 
@@ -50,7 +49,7 @@ pub fn render_frames<'a, R: Renderable>(
 
         canvas.with_multiple_texture_canvas(textures.iter(), |texture_canvas, frame| {
             info!("Rendering frame {}/{}", frame, frames_count);
-            texture_canvas.set_draw_color(Color::RGB(0, 0, 0));
+            texture_canvas.set_draw_color(Color::RGBA(0, 0, 0, 0));
             texture_canvas.clear();
             context.animate(*frame as u32);
             let scene = context.render();
@@ -144,10 +143,11 @@ pub fn render_frames<'a, R: Renderable>(
             // Writing down colors to texture
             for (i, column) in columns.iter().enumerate() {
                 for (j, total_color) in column.iter().enumerate() {
-                    texture_canvas.set_draw_color(Color::RGB(
+                    texture_canvas.set_draw_color(Color::RGBA(
                         (total_color.x * 255.0) as u8,
                         (total_color.y * 255.0) as u8,
                         (total_color.z * 255.0) as u8,
+                        (total_color.w * 255.0) as u8,
                     ));
                     texture_canvas
                         .draw_point(Point::new(i as i32, (tile_size.y - j as u32) as i32))

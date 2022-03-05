@@ -17,7 +17,7 @@ const TILE_WIDTH: u32 = 64;
 const TILE_HEIGHT: u32 = 128;
 const WINDOW_WIDTH: u32 = 1024;
 const WINDOW_HEIGHT: u32 = 1024;
-const FRAMES_COUNT: u32 = 256;
+const FRAMES_COUNT: u32 = 512;
 
 struct TestScene {
     smoke: SmokeModel,
@@ -92,6 +92,8 @@ impl TestScene {
         let model = SmokeModel {
             size: UVec3::new(64, 128, 64),
             particles,
+            ceiling_height: 42.0,
+            ceiling_speed: -0.1,
             ..SmokeModel::default()
         };
         let eye = Vec3::new(128., 128., 128.);
