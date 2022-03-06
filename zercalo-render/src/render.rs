@@ -4,12 +4,12 @@ use log::*;
 use rayon::prelude::*;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::Point;
-use sdl2::render::{Canvas, Texture, TextureCreator, BlendMode};
+use sdl2::render::{BlendMode, Canvas, Texture, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use thiserror::Error;
 
 use zercalo_format::animation::Renderable;
-use zercalo_format::scene::ColorRGBA;
+use zercalo_format::color::ColorRGBA;
 
 #[derive(Debug, Error)]
 pub enum RenderError {

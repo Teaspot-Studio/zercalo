@@ -2,8 +2,8 @@ use glam::f32::Quat;
 use glam::{UVec3, Vec3};
 use noise::{NoiseFn, OpenSimplex};
 
-use crate::animation::HasBounding;
-use crate::scene::{ColorRGBA, Model};
+use crate::color::ColorRGBA;
+use crate::scene::{HasBounding, Model};
 
 pub struct SmokePart {
     pub offset: Vec3,

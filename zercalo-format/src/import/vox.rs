@@ -1,6 +1,7 @@
-use crate::scene::{ColorRGBA, Model};
-use glam::{UVec3, Vec3};
+use crate::color::ColorRGBA;
+use crate::scene::Model;
 use glam::f32::Quat;
+use glam::{UVec3, Vec3};
 use std::collections::HashMap;
 use thiserror::Error;
 
@@ -60,6 +61,6 @@ pub fn vox_color_to_rgba(c: u32) -> ColorRGBA {
         (c & 0xFF) as u8,
         ((c >> 8) & 0xFF) as u8,
         ((c >> 16) & 0xFF) as u8,
-        ((c >> 24) & 0xFF) as u8
+        ((c >> 24) & 0xFF) as u8,
     )
 }

@@ -1,7 +1,8 @@
 use glam::{UVec2, Vec2, Vec3};
 use zercalo_format::animation::RotationView;
-use zercalo_format::scene::{Camera, ColorRGB, Light, Scene};
+use zercalo_format::color::ColorRGB;
 use zercalo_format::import::vox::{from_vox_file, VoxImportError};
+use zercalo_format::scene::{Camera, Light, Scene};
 
 pub type TeapotScene = RotationView<Scene>;
 

@@ -1,14 +1,15 @@
 use glam::{UVec2, Vec2, Vec3};
 use maplit::hashmap;
 use zercalo_format::animation::RotationView;
+use zercalo_format::color::{ColorRGB, ColorRGBA};
 use zercalo_format::import::vox::{from_vox_file, VoxImportError};
-use zercalo_format::scene::{Camera, ColorRGB, Light, Scene, ColorRGBA};
+use zercalo_format::scene::{Camera, Light, Scene};
 
 pub type HarvesterScene = RotationView<Scene>;
 
 pub fn new_harvester_scene(player_color: ColorRGBA) -> Result<HarvesterScene, VoxImportError> {
     let mut model = from_vox_file("./assets/models/harvester_full.vox")?[0].clone();
-    model.replace_colors = hashmap!{
+    model.replace_colors = hashmap! {
         ColorRGBA::new(183, 183, 183, 255) => player_color,
         ColorRGBA::new(23, 84, 131, 255) => ColorRGBA::new(23, 84, 131, 100),
     };

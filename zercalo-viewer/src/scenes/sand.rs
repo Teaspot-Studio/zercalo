@@ -1,7 +1,8 @@
 use glam::{UVec2, UVec3, Vec2, Vec3};
-use zercalo_format::animation::{HasBounding, HasCamera, HasMutCamera, Renderable, RotationView};
+use zercalo_format::animation::{Renderable, RotationView};
+use zercalo_format::color::{ColorRGB, ColorRGBA};
 use zercalo_format::procedure::particles::ParticlesModel;
-use zercalo_format::scene::{Camera, ColorRGB, ColorRGBA, Light, Scene};
+use zercalo_format::scene::{Camera, HasBounding, HasCamera, HasMutCamera, Light, Scene};
 
 pub struct SandScene {
     sand: ParticlesModel,

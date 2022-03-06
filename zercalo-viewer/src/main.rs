@@ -9,10 +9,10 @@ use sdl2::render::TextureCreator;
 use std::error::Error;
 
 use crate::scenes::*;
+use zercalo_format::color::ColorRGBA;
+use zercalo_format::scene::HasCamera;
 use zercalo_render::encode::save_frames;
 use zercalo_render::render::render_frames;
-use zercalo_format::animation::HasCamera;
-use zercalo_format::scene::ColorRGBA;
 
 const WINDOW_WIDTH: u32 = 1024;
 const WINDOW_HEIGHT: u32 = 1024;
