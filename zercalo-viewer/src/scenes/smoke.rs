@@ -1,7 +1,9 @@
-use glam::{UVec2, Vec3};
+use glam::{UVec2, UVec3, Vec3};
+use glam::f32::Quat;
 use zercalo_format::animation::{HasBounding, HasCamera, HasMutCamera, Renderable, RotationView};
-use zercalo_format::procedure::smoke::SmokeModel;
-use zercalo_format::scene::{Camera, ColorRGB, Light, Scene};
+use zercalo_format::procedure::smoke::{SmokeModel, SmokePart};
+use zercalo_format::scene::{Camera, ColorRGB, ColorRGBA, Light, Scene};
+use noise::OpenSimplex;
 
 pub struct SmokeScene {
     smoke: SmokeModel,
@@ -11,7 +13,7 @@ pub struct SmokeScene {
 
 impl SmokeScene {
     pub fn new() -> RotationView<SmokeScene> {
-        let model = SmokeModel::default();
+        let model = SmokeScene::smoke_model();
         let eye = Vec3::new(128., 128., 128.);
         let mut scene = SmokeScene {
             smoke: model,
@@ -20,6 +22,7 @@ impl SmokeScene {
                     eye,
                     dir: -eye.normalize(),
                     viewport: UVec2::new(64, 128),
+                    max_frames: 512,
                     ..Camera::default()
                 },
                 lights: vec![Light {
@@ -35,6 +38,83 @@ impl SmokeScene {
             target_y: Some(32.0),
             rotation_speed: 0.0,
         } // std::f32::consts::PI / 180.0
+    }
+
+    fn smoke_model() -> SmokeModel {
+        let particles = vec![
+            SmokePart {
+                offset: Vec3::new(32.0, 2.0, 32.0),
+                radius: 3.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.001,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 40.0,
+            },
+            SmokePart {
+                offset: Vec3::new(25.0, -5.0, 32.0),
+                radius: 2.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.002,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 50.0,
+            },
+            SmokePart {
+                offset: Vec3::new(32.0, -5.0, 25.0),
+                radius: 5.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.004,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 50.0,
+            },
+            SmokePart {
+                offset: Vec3::new(32.0, -15.0, 32.0),
+                radius: 2.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.002,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 60.0,
+            },
+            SmokePart {
+                offset: Vec3::new(32.0, -30.0, 20.0),
+                radius: 1.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.002,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 60.0,
+            },
+            SmokePart {
+                offset: Vec3::new(20.0, -35.0, 32.0),
+                radius: 1.0,
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                radius_vel: 0.02,
+                temperature: 1.0,
+                temperature_speed: -0.002,
+                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
+                scale_noise_result: 60.0,
+            },
+        ];
+        SmokeModel {
+            size: UVec3::new(64, 128, 64),
+            offset: Vec3::ZERO,
+            rotation: Quat::from_axis_angle(Vec3::Y, 0.0),
+            particles,
+            noise: OpenSimplex::new(),
+            cold_color: ColorRGBA::new(111, 123, 155, 255),
+            hot_color: ColorRGBA::new(229, 88, 41, 255),
+            very_hot_color: ColorRGBA::new(249, 195, 0, 255),
+            ceiling_height: 42.0,
+            ceiling_speed: -0.1,
+        }
     }
 }
 

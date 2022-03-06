@@ -31,73 +31,11 @@ pub struct SmokeModel {
 
 impl Default for SmokeModel {
     fn default() -> Self {
-        let particles = vec![
-            SmokePart {
-                offset: Vec3::new(32.0, 2.0, 32.0),
-                radius: 3.0,
-                velocity: Vec3::new(0.0, 0.2, 0.0),
-                radius_vel: 0.02,
-                temperature: 1.0,
-                temperature_speed: -0.001,
-                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
-                scale_noise_result: 40.0,
-            },
-            SmokePart {
-                offset: Vec3::new(25.0, -5.0, 32.0),
-                radius: 2.0,
-                velocity: Vec3::new(0.0, 0.2, 0.0),
-                radius_vel: 0.02,
-                temperature: 1.0,
-                temperature_speed: -0.002,
-                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
-                scale_noise_result: 50.0,
-            },
-            SmokePart {
-                offset: Vec3::new(32.0, -5.0, 25.0),
-                radius: 5.0,
-                velocity: Vec3::new(0.0, 0.2, 0.0),
-                radius_vel: 0.02,
-                temperature: 1.0,
-                temperature_speed: -0.004,
-                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
-                scale_noise_result: 50.0,
-            },
-            SmokePart {
-                offset: Vec3::new(32.0, -15.0, 32.0),
-                radius: 2.0,
-                velocity: Vec3::new(0.0, 0.2, 0.0),
-                radius_vel: 0.02,
-                temperature: 1.0,
-                temperature_speed: -0.002,
-                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
-                scale_noise_result: 60.0,
-            },
-            SmokePart {
-                offset: Vec3::new(32.0, -30.0, 20.0),
-                radius: 1.0,
-                velocity: Vec3::new(0.0, 0.2, 0.0),
-                radius_vel: 0.02,
-                temperature: 1.0,
-                temperature_speed: -0.002,
-                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
-                scale_noise_result: 60.0,
-            },
-            SmokePart {
-                offset: Vec3::new(20.0, -35.0, 32.0),
-                radius: 1.0,
-                velocity: Vec3::new(0.0, 0.2, 0.0),
-                radius_vel: 0.02,
-                temperature: 1.0,
-                temperature_speed: -0.002,
-                scale_noise_coords: Vec3::new(0.2, 0.2, 0.2),
-                scale_noise_result: 60.0,
-            },
-        ];
         SmokeModel {
-            size: UVec3::new(64, 128, 64),
+            size: UVec3::new(1, 1, 1),
             offset: Vec3::ZERO,
             rotation: Quat::from_axis_angle(Vec3::Y, 0.0),
-            particles,
+            particles: vec![],
             noise: OpenSimplex::new(),
             cold_color: ColorRGBA::new(111, 123, 155, 255),
             hot_color: ColorRGBA::new(229, 88, 41, 255),
@@ -127,7 +65,7 @@ impl SmokeModel {
     pub fn generate(&self) -> Model {
         let mut model = Model::from_function(self.size, |pos| {
             for part in self.particles.iter() {
-                let d2 = (self.offset + part.offset - pos.as_vec3()).length_squared();
+                let d2 = (part.offset - pos.as_vec3()).length_squared();
 
                 let dr = (self.noise.get([
                     (pos.x as f64) * part.scale_noise_coords.x as f64,

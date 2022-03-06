@@ -4,11 +4,12 @@ use log::*;
 use rayon::prelude::*;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::Point;
-use sdl2::render::{Canvas, Texture, TextureCreator};
+use sdl2::render::{Canvas, Texture, TextureCreator, BlendMode};
 use sdl2::video::{Window, WindowContext};
 use thiserror::Error;
 
 use zercalo_format::animation::Renderable;
+use zercalo_format::scene::ColorRGBA;
 
 #[derive(Debug, Error)]
 pub enum RenderError {
@@ -18,14 +19,10 @@ pub enum RenderError {
     Render(#[from] sdl2::render::TargetRenderError),
 }
 
+/// Premultiplied alpha over operation for colors
+#[inline]
 fn blend_colors(src: Vec4, dst: Vec4) -> Vec4 {
-    let dist_factor = dst.w * (1.0 - src.w);
-    let mut res = src;
-    res.x = src.x * src.w + dst.x * dist_factor;
-    res.y = src.y * src.w + dst.y * dist_factor;
-    res.z = src.z * src.w + dst.z * dist_factor;
-    res.w += dist_factor;
-    res
+    src + dst * (1.0 - src.w)
 }
 
 pub fn render_frames<'a, R: Renderable>(
@@ -37,11 +34,12 @@ pub fn render_frames<'a, R: Renderable>(
 ) -> Result<Vec<Texture<'a>>, RenderError> {
     let mut frames = vec![];
     for _ in 0..frames_count {
-        let frame = texture_creator.create_texture_target(
+        let mut frame = texture_creator.create_texture_target(
             Some(PixelFormatEnum::RGBA8888),
             tile_size.x,
             tile_size.y,
         )?;
+        frame.set_blend_mode(BlendMode::Blend);
         frames.push(frame);
     }
 
@@ -111,7 +109,7 @@ pub fn render_frames<'a, R: Renderable>(
                                         .replace_colors
                                         .get(&diffuse_orig)
                                         .unwrap_or(&diffuse_orig)
-                                        .as_vec4();
+                                        .as_premultipied();
 
                                     let mut light_component = Vec3::new(0.0, 0.0, 0.0);
                                     for light in scene.lights.iter() {
@@ -153,11 +151,9 @@ pub fn render_frames<'a, R: Renderable>(
             // Writing down colors to texture
             for (i, column) in columns.iter().enumerate() {
                 for (j, total_color) in column.iter().enumerate() {
+                    let restored = ColorRGBA::from_premultiplied(total_color);
                     texture_canvas.set_draw_color(Color::RGBA(
-                        (total_color.x * 255.0) as u8,
-                        (total_color.y * 255.0) as u8,
-                        (total_color.z * 255.0) as u8,
-                        (total_color.w * 255.0) as u8,
+                        restored.r, restored.g, restored.b, restored.a,
                     ));
                     texture_canvas
                         .draw_point(Point::new(i as i32, (tile_size.y - j as u32) as i32))

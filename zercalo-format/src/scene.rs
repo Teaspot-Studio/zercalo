@@ -1,5 +1,5 @@
-use glam::{UVec2, UVec3, Vec2, Vec3, Vec4};
 use glam::f32::Quat;
+use glam::{UVec2, UVec3, Vec2, Vec3, Vec4};
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::ops::Index;
@@ -86,6 +86,32 @@ impl ColorRGBA {
         }
     }
 
+    /// Convert color to Vec4 where each component are in range 0 .. 1.0 and
+    /// premultiplied by alpha value to correctly process alpha blending.
+    ///
+    /// In that representation RGB components represents how much light of
+    /// each channel is captured.
+    pub fn as_premultipied(&self) -> Vec4 {
+        let x = (self.r as f32) / 255.0;
+        let y = (self.g as f32) / 255.0;
+        let z = (self.b as f32) / 255.0;
+        let w = (self.a as f32) / 255.0;
+        Vec4::new(x * w, y * w, z * w, w)
+    }
+
+    /// Convert color from Vec4 where each component are in range 0 .. 1.0 and
+    /// premultiplied by alpha value to correctly process alpha blending.
+    ///
+    /// In that representation RGB components represents how much light of
+    /// each channel is captured.
+    pub fn from_premultiplied(v: &Vec4) -> Self {
+        let r = (v.x / v.w * 255.0) as u8;
+        let g = (v.y / v.w * 255.0) as u8;
+        let b = (v.z / v.w * 255.0) as u8;
+        let a = (v.w * 255.0) as u8;
+        ColorRGBA::new(r, g, b, a)
+    }
+
     pub fn player1() -> Self {
         ColorRGBA::new(240, 0, 0, 255)
     }
@@ -125,7 +151,28 @@ pub struct Model {
     pub replace_colors: HashMap<ColorRGBA, ColorRGBA>,
 }
 
+impl Default for Model {
+    fn default() -> Self {
+        Model {
+            size: UVec3::new(1, 1, 1),
+            voxels: vec![],
+            offset: Vec3::ZERO,
+            rotation: Quat::from_axis_angle(Vec3::Y, 0.0),
+            replace_colors: HashMap::new(),
+        }
+    }
+}
+
 impl Model {
+    /// Create new empty model with given size of voxel grid
+    pub fn new(size: UVec3) -> Self {
+        Model {
+            size,
+            voxels: vec![ColorRGBA::empty(); size.x as usize * size.y as usize * size.z as usize],
+            ..Model::default()
+        }
+    }
+
     /// Generate model volume procedurely
     pub fn from_function<F>(size: UVec3, generator: F) -> Self
     where
@@ -159,6 +206,18 @@ impl Model {
             replace_colors: HashMap::new(),
         }
     }
+
+    /// Set voxel color at given local coords, panics on boundary violation
+    pub fn set_voxel(&mut self, p: UVec3, v: ColorRGBA) {
+        let i = p.x + p.y * self.size.x + p.z * self.size.x * self.size.y;
+        self.voxels[i as usize] = v;
+    }
+
+    /// Get voxel color at given local coords, panics on boundary violation
+    pub fn get_voxel(&self, p: UVec3) -> ColorRGBA {
+        let i = p.x + p.y * self.size.x + p.z * self.size.x * self.size.y;
+        self.voxels[i as usize]
+    }
 }
 
 impl Index<UVec3> for Model {
@@ -190,6 +249,8 @@ pub struct Camera {
     pub viewport: UVec2,
     /// How much the tile should be scaled
     pub view_scale: Vec2,
+    /// Amount of frames to render
+    pub max_frames: u32,
 }
 
 impl Default for Camera {
@@ -203,6 +264,7 @@ impl Default for Camera {
             max_dist: DEFAULT_RAY_MAX_DIST,
             viewport: UVec2::new(DEFAULT_TILE_WIDTH, DEFAULT_TILE_HEIGHT),
             view_scale: Vec2::new(7.0, 7.0),
+            max_frames: 128,
         }
     }
 }

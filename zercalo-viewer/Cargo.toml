@@ -7,9 +7,11 @@ edition = "2021"
 
 [dependencies]
 env_logger = "0.9.0"
+fastrand = "1.7.0"
 glam = "0.20.2"
 log = "0.4.14"
 maplit = "1.0.2"
+noise = "0.7.0"
 sdl2 = { version = "0.35.2" }
 zercalo-format = { path = "../zercalo-format" }
 zercalo-render = { path = "../zercalo-render" }

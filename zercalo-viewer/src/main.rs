@@ -16,7 +16,6 @@ use zercalo_format::scene::ColorRGBA;
 
 const WINDOW_WIDTH: u32 = 1024;
 const WINDOW_HEIGHT: u32 = 1024;
-const FRAMES_COUNT: u32 = 512;
 
 fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
@@ -42,8 +41,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     canvas.clear();
     canvas.present();
 
-    let scene = new_harvester_scene(ColorRGBA::player1())?;
+    // let scene = new_harvester_scene(ColorRGBA::player2())?;
     // let scene = SmokeScene::new();
+    let scene = SandScene::new();
 
     let mut event_pump = sdl_context.event_pump()?;
     let texture_creator: TextureCreator<_> = canvas.texture_creator();
@@ -53,7 +53,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut frames = render_frames(
         &mut canvas,
         &texture_creator,
-        FRAMES_COUNT,
+        cam.max_frames,
         tile_size,
         scene,
     )?;
@@ -81,7 +81,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
+        canvas.set_draw_color(Color::RGB(20, 20, 20));
         canvas.clear();
         let (sx, sy) = canvas.scale();
         canvas.copy(

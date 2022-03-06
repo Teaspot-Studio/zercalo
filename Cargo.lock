@@ -249,6 +249,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fastrand"
+version = "1.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3fcf0cee53519c866c09b5de1f6c56ff9d647101f81c1964fa632e148896cdf"
+dependencies = [
+ "instant",
+]
+
+[[package]]
 name = "flate2"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -367,6 +376,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1cdb29978cc5797bd8dcc8e5bf7de604891df2a8dc576973d71a281e916db2ff"
 dependencies = [
  "adler32",
+]
+
+[[package]]
+name = "instant"
+version = "0.1.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a5bbe824c507c5da5956355e86a746d82e0e1464f65d862cc5e71da70e94b2c"
+dependencies = [
+ "cfg-if",
 ]
 
 [[package]]
@@ -905,6 +923,7 @@ name = "zercalo-format"
 version = "0.1.0"
 dependencies = [
  "dot_vox",
+ "fastrand",
  "glam 0.20.2",
  "noise",
  "rayon",
@@ -931,9 +950,11 @@ name = "zercalo-viewer"
 version = "0.1.0"
 dependencies = [
  "env_logger",
+ "fastrand",
  "glam 0.20.2",
  "log",
  "maplit",
+ "noise",
  "sdl2",
  "zercalo-format",
  "zercalo-render",
