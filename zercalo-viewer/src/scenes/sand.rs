@@ -20,7 +20,7 @@ impl SandScene {
         let mut model = ParticlesModel::new_random(
             &rng,
             UVec3::new(128, 128, 128),
-            (100, 200),
+            (500, 700),
             (Vec3::new(0.0, 0.1, 0.0), Vec3::new(0.3, 1.0, 0.3)),
             (Vec3::new(60.0, -20.0, 60.0), Vec3::new(70.0, 1.0, 70.0)),
             (1, 3),
