@@ -41,9 +41,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     canvas.clear();
     canvas.present();
 
-    // let scene = new_harvester_scene(ColorRGBA::player2())?;
+    let scene = new_harvester_scene(ColorRGBA::player2())?;
     // let scene = SmokeScene::new();
-    let scene = SandScene::new();
+    // let scene = SandScene::new();
 
     let mut event_pump = sdl_context.event_pump()?;
     let texture_creator: TextureCreator<_> = canvas.texture_creator();

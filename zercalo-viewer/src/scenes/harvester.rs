@@ -10,7 +10,7 @@ pub fn new_harvester_scene(player_color: ColorRGBA) -> Result<HarvesterScene, Vo
     let mut model = from_vox_file("./assets/models/harvester_full.vox")?[0].clone();
     model.replace_colors = hashmap!{
         ColorRGBA::new(183, 183, 183, 255) => player_color,
-        ColorRGBA::new(23, 84, 131, 255) => ColorRGBA::new(23, 84, 131, 200),
+        ColorRGBA::new(23, 84, 131, 255) => ColorRGBA::new(23, 84, 131, 100),
     };
 
     let eye = Vec3::new(128., 128., 128.);
