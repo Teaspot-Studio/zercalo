@@ -26,10 +26,13 @@ pub fn new_harvester_scene(
     };
     body.offset = Vec3::new(4., 0., 0.);
 
-    let tracker_right = new_tracker()?;
+    let mut tracker_right = new_tracker()?;
+    for m in tracker_right.variants.iter_mut() {
+        m.offset = Vec3::new(0., 0., 4.);
+    }
     let mut tracker_left = tracker_right.clone();
     for m in tracker_left.variants.iter_mut() {
-        m.offset = Vec3::new(16.0, 0., 0.);
+        m.offset = Vec3::new(16.0, 0., 4.);
     }
 
     let mut collector = from_vox_file("./assets/models/harvester_collector.vox")?[0].clone();
