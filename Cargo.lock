@@ -925,6 +925,7 @@ dependencies = [
  "dot_vox",
  "fastrand",
  "glam 0.20.2",
+ "log",
  "noise",
  "rayon",
  "thiserror",

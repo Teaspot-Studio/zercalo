@@ -8,8 +8,9 @@ use sdl2::render::{BlendMode, Canvas, Texture, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use thiserror::Error;
 
-use zercalo_format::animation::Renderable;
+use zercalo_format::animation::Animatable;
 use zercalo_format::color::ColorRGBA;
+use zercalo_format::scene::HasScene;
 
 #[derive(Debug, Error)]
 pub enum RenderError {
@@ -25,7 +26,7 @@ fn blend_colors(src: Vec4, dst: Vec4) -> Vec4 {
     src + dst * (1.0 - src.w)
 }
 
-pub fn render_frames<'a, R: Renderable>(
+pub fn render_frames<'a, R: Animatable + HasScene>(
     canvas: &mut Canvas<Window>,
     texture_creator: &'a TextureCreator<WindowContext>,
     frames_count: u32,
@@ -54,7 +55,7 @@ pub fn render_frames<'a, R: Renderable>(
             texture_canvas.set_draw_color(Color::RGBA(0, 0, 0, 0));
             texture_canvas.clear();
             context.animate(*frame as u32);
-            let scene = context.render();
+            let scene = context.get_scene();
 
             // First render columns in parallel
             let mut columns = vec![];

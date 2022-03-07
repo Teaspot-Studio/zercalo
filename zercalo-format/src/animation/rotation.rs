@@ -1,4 +1,4 @@
-use super::renderable::Renderable;
+use super::animatable::Animatable;
 use crate::scene::{Camera, HasBounding, HasCamera, HasMutCamera, HasMutScene, HasScene, Scene};
 use glam::f32::Quat;
 use glam::Vec3;
@@ -39,7 +39,7 @@ impl<T: HasMutScene> HasMutScene for RotationView<T> {
     }
 }
 
-impl<T: Renderable + HasMutCamera + HasBounding> Renderable for RotationView<T> {
+impl<T: Animatable + HasMutCamera + HasBounding> Animatable for RotationView<T> {
     fn animate(&mut self, frame: u32) {
         self.scene.animate(frame);
 
@@ -52,9 +52,5 @@ impl<T: Renderable + HasMutCamera + HasBounding> Renderable for RotationView<T> 
         let cam = self.scene.get_mut_camera();
         cam.eye = target + quat.mul_vec3(cam.eye - target);
         cam.dir = (target - cam.eye).normalize();
-    }
-
-    fn render(&self) -> &Scene {
-        self.scene.render()
     }
 }

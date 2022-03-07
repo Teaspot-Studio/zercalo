@@ -1,8 +1,8 @@
 use glam::{UVec2, UVec3, Vec2, Vec3};
-use zercalo_format::animation::{Renderable, RotationView};
+use zercalo_format::animation::{Animatable, RotationView};
 use zercalo_format::color::{ColorRGB, ColorRGBA};
 use zercalo_format::procedure::particles::ParticlesModel;
-use zercalo_format::scene::{Camera, HasBounding, HasCamera, HasMutCamera, Light, Scene};
+use zercalo_format::scene::{Camera, HasBounding, HasCamera, HasMutCamera, HasScene, Light, Scene};
 
 pub struct SandScene {
     sand: ParticlesModel,
@@ -71,14 +71,16 @@ impl HasMutCamera for SandScene {
     }
 }
 
-impl Renderable for SandScene {
+impl HasScene for SandScene {
+    fn get_scene(&self) -> &Scene {
+        &self.rendered
+    }
+}
+
+impl Animatable for SandScene {
     fn animate(&mut self, frame: u32) {
         self.sand.animate(frame);
         self.rendered.models = vec![self.sand.generate()];
-    }
-
-    fn render(&self) -> &Scene {
-        &self.rendered
     }
 }
 

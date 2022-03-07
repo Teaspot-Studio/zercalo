@@ -1,10 +1,10 @@
 use glam::f32::Quat;
 use glam::{UVec2, UVec3, Vec3};
 use noise::OpenSimplex;
-use zercalo_format::animation::{Renderable, RotationView};
+use zercalo_format::animation::{Animatable, RotationView};
 use zercalo_format::color::{ColorRGB, ColorRGBA};
 use zercalo_format::procedure::smoke::{SmokeModel, SmokePart};
-use zercalo_format::scene::{Camera, HasBounding, HasCamera, HasMutCamera, Light, Scene};
+use zercalo_format::scene::{Camera, HasBounding, HasCamera, HasMutCamera, HasScene, Light, Scene};
 
 pub struct SmokeScene {
     smoke: SmokeModel,
@@ -131,14 +131,16 @@ impl HasMutCamera for SmokeScene {
     }
 }
 
-impl Renderable for SmokeScene {
+impl HasScene for SmokeScene {
+    fn get_scene(&self) -> &Scene {
+        &self.rendered
+    }
+}
+
+impl Animatable for SmokeScene {
     fn animate(&mut self, frame: u32) {
         self.smoke.animate(frame);
         self.rendered.models = vec![self.smoke.generate()];
-    }
-
-    fn render(&self) -> &Scene {
-        &self.rendered
     }
 }
 
