@@ -8,8 +8,8 @@ use zercalo_format::scene::{
 };
 
 pub struct HarvesterScene {
-    tracker_right: Switcher<Model>,
-    tracker_left: Switcher<Model>,
+    track_right: Switcher<Model>,
+    track_left: Switcher<Model>,
     body: Model,
     collector: Model,
     /// Scene is cached to store voxels for renderer
@@ -26,12 +26,12 @@ pub fn new_harvester_scene(
     };
     body.offset = Vec3::new(4., 0., 0.);
 
-    let mut tracker_right = new_tracker()?;
-    for m in tracker_right.variants.iter_mut() {
+    let mut track_right = new_track()?;
+    for m in track_right.variants.iter_mut() {
         m.offset = Vec3::new(0., 0., 4.);
     }
-    let mut tracker_left = tracker_right.clone();
-    for m in tracker_left.variants.iter_mut() {
+    let mut track_left = track_right.clone();
+    for m in track_left.variants.iter_mut() {
         m.offset = Vec3::new(16.0, 0., 4.);
     }
 
@@ -56,8 +56,8 @@ pub fn new_harvester_scene(
         ..Scene::default()
     };
     let ext_scene = HarvesterScene {
-        tracker_right,
-        tracker_left,
+        track_right,
+        track_left,
         body,
         collector,
         rendered: scene,
@@ -69,7 +69,7 @@ pub fn new_harvester_scene(
     })
 }
 
-fn new_tracker() -> Result<Switcher<Model>, VoxImportError> {
+fn new_track() -> Result<Switcher<Model>, VoxImportError> {
     let paths = vec![
         (5, "./assets/models/harvester_track_01.vox"),
         (5, "./assets/models/harvester_track_02.vox"),
@@ -105,11 +105,11 @@ impl HasScene for HarvesterScene {
 
 impl Animatable for HarvesterScene {
     fn animate(&mut self, frame: u32) {
-        self.tracker_right.animate(frame);
-        self.tracker_left.animate(frame);
+        self.track_right.animate(frame);
+        self.track_left.animate(frame);
         self.rendered.models = vec![
-            self.tracker_right.current().clone(),
-            self.tracker_left.current().clone(),
+            self.track_right.current().clone(),
+            self.track_left.current().clone(),
             self.body.clone(),
             self.collector.clone(),
         ];
