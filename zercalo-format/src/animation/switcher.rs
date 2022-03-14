@@ -51,6 +51,15 @@ impl<T> Switcher<T> {
     pub fn current_mut(&mut self) -> &mut T {
         &mut self.variants[self.active as usize]
     }
+
+    /// Get number of frames that takes to make single cycle
+    pub fn cycle_len(&self) -> u32 {
+        if let Some(i) = self.schedule.last() {
+            *i
+        } else {
+            0
+        }
+    }
 }
 
 impl<T: HasCamera> HasCamera for Switcher<T> {
@@ -107,15 +116,12 @@ impl<T: Animatable> Animatable for Switcher<T> {
             self.schedule.len()
         );
 
-        self.current_mut().animate(frame);
-        let dframe = frame - self.last_frame;
-        let new_frame = self.last_frame + dframe;
         let border = self.schedule[self.active as usize] + self.loop_offset;
-        if new_frame >= border {
+        if frame >= border {
             if self.active as usize >= self.variants.len() - 1 {
                 if self.looping {
                     self.active = 0;
-                    self.loop_offset = new_frame;
+                    self.loop_offset = frame;
                 } else {
                     self.active = (self.variants.len() - 1) as u32;
                 }
@@ -123,6 +129,7 @@ impl<T: Animatable> Animatable for Switcher<T> {
                 self.active += 1;
             }
         }
-        self.last_frame = new_frame;
+        self.last_frame = frame;
+        self.current_mut().animate(frame);
     }
 }

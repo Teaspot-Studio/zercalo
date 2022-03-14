@@ -41,7 +41,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     canvas.clear();
     canvas.present();
 
-    let scene = new_harvester_scene(ColorRGBA::player2())?;
+    // let scene = new_harvester_scene(ColorRGBA::player2())?;
+    let scene = new_sandworm_scene()?;
     // let scene = SmokeScene::new();
     // let scene = SandScene::new();
 
