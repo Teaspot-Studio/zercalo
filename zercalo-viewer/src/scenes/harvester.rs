@@ -19,7 +19,7 @@ pub struct HarvesterScene {
 pub fn new_harvester_scene(
     player_color: ColorRGBA,
 ) -> Result<RotationView<HarvesterScene>, VoxImportError> {
-    let mut body = from_vox_file("./assets/models/harvester_body.vox")?[0].clone();
+    let mut body = from_vox_file("./assets/models/harvester/harvester_body.vox")?[0].clone();
     body.replace_colors = hashmap! {
         ColorRGBA::new(183, 183, 183, 255) => player_color,
         ColorRGBA::new(23, 84, 131, 255) => ColorRGBA::new(23, 84, 131, 100),
@@ -35,7 +35,7 @@ pub fn new_harvester_scene(
         m.offset = Vec3::new(16.0, 0., 4.);
     }
 
-    let mut collector = from_vox_file("./assets/models/harvester_collector.vox")?[0].clone();
+    let mut collector = from_vox_file("./assets/models/harvester/harvester_collector.vox")?[0].clone();
     collector.offset = Vec3::new(0.0, 0.0, 32.0);
 
     let eye = Vec3::new(128., 128., 128.);
@@ -71,9 +71,9 @@ pub fn new_harvester_scene(
 
 fn new_track() -> Result<Switcher<Model>, VoxImportError> {
     let paths = vec![
-        (5, "./assets/models/harvester_track_01.vox"),
-        (5, "./assets/models/harvester_track_02.vox"),
-        (5, "./assets/models/harvester_track_03.vox"),
+        (5, "./assets/models/harvester/harvester_track_01.vox"),
+        (5, "./assets/models/harvester/harvester_track_02.vox"),
+        (5, "./assets/models/harvester/harvester_track_03.vox"),
     ];
     let models: Result<Vec<(u32, Model)>, VoxImportError> = paths
         .into_iter()
