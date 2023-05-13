@@ -9,6 +9,7 @@ use sdl2::render::TextureCreator;
 use std::error::Error;
 
 use crate::scenes::*;
+
 use zercalo_format::color::ColorRGBA;
 use zercalo_format::scene::HasCamera;
 use zercalo_render::encode::save_frames;
@@ -19,30 +20,28 @@ const WINDOW_HEIGHT: u32 = 1024;
 
 fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
-
+    trace!("Init SDL");
     let sdl_context = sdl2::init()?;
+    trace!("Init video subsystem");
     let video_subsystem = sdl_context.video()?;
 
+    trace!("Create window");
     let window = video_subsystem
         .window("Zercalo voxel renderer", WINDOW_WIDTH, WINDOW_HEIGHT)
         .position_centered()
         .build()
         .map_err(|e| e.to_string())?;
 
-    let mut canvas = window
-        .into_canvas()
-        .target_texture()
-        .present_vsync()
-        .build()
-        .map_err(|e| e.to_string())?;
+    trace!("Making canvas");
+    let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
 
     info!("Using SDL_Renderer \"{}\"", canvas.info().name);
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
     canvas.present();
 
-    let scene = new_penetrator_scene()?;
-    // let scene = new_harvester_scene(ColorRGBA::player2())?;
+    // let scene = new_penetrator_scene()?;
+    let scene = new_harvester_scene(ColorRGBA::player2())?;
     // let scene = SmokeScene::new();
     // let scene = SandScene::new();
 
@@ -75,7 +74,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        if counter % 2 == 0 {
+        if counter % 10 == 0 {
             frame += 1;
             if frame >= frames.len() {
                 frame = 0;
